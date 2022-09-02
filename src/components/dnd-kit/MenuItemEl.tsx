@@ -1,4 +1,9 @@
-import { DragHandleIcon, LinkIcon, StarIcon } from '@chakra-ui/icons'
+import { DragHandleIcon } from '@chakra-ui/icons'
+import {
+  DocumentIcon,
+  FolderIcon,
+  ServerStackIcon,
+} from '@heroicons/react/24/outline'
 import { CSSProperties, forwardRef, Ref } from 'react'
 import { MenuItem } from '@/domain/data'
 import { cx } from '@/utils/cx'
@@ -103,8 +108,21 @@ const MenuItemEl = forwardRef<HTMLDivElement, MenuItemElProps>(
 MenuItemEl.displayName = 'MenuItemEl'
 
 function MenuIcon({ type }: Pick<MenuItem, 'type'>) {
-  if (type === 'link') return <LinkIcon aria-label="Module icon" />
-  if (type === 'module') return <StarIcon aria-label="Link icon" />
+  if (type === 'block')
+    return (
+      <DocumentIcon className="h-6 w-6 text-blue-600" aria-label="block icon" />
+    )
+  if (type === 'sub-section')
+    return (
+      <FolderIcon className="h-6 w-6 text-red-600" aria-label="Link icon" />
+    )
+  if (type === 'section')
+    return (
+      <ServerStackIcon
+        className="h-6 w-6 text-green-700"
+        aria-label="Link icon"
+      />
+    )
   return null
 }
 

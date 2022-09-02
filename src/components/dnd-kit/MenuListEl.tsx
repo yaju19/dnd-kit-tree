@@ -1,7 +1,7 @@
 import { DragOverlay } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useMemo } from 'react'
-import { createPortal } from 'react-dom'
+// import { createPortal } from 'react-dom'
 import { FlattenedMenuItem, MenuItem } from '@/domain/data'
 import { DropProjection } from '@/utils/dnd'
 import { getChildCount } from '@/utils/tree'
@@ -47,23 +47,20 @@ const MenuListEl = (props: MenuListElProps): JSX.Element => {
           )
         })}
       </div>
-      {createPortal(
-        <DragOverlay>
-          {activeMenuId && activeMenuItem && (
-            <SortableMenuItem
-              isClone
-              id={activeMenuId}
-              depth={activeMenuItem.depth}
-              title={activeMenuItem.title}
-              menuType={activeMenuItem.type}
-              indentWidth={indentWidth}
-              // + 1 to include the active menu item
-              childCount={getChildCount(menus, activeMenuId) + 1}
-            />
-          )}
-        </DragOverlay>,
-        document.body
-      )}
+      <DragOverlay>
+        {activeMenuId && activeMenuItem && (
+          <SortableMenuItem
+            isClone
+            id={activeMenuId}
+            depth={activeMenuItem.depth}
+            title={activeMenuItem.title}
+            menuType={activeMenuItem.type}
+            indentWidth={indentWidth}
+            // + 1 to include the active menu item
+            childCount={getChildCount(menus, activeMenuId) + 1}
+          />
+        )}
+      </DragOverlay>{' '}
     </SortableContext>
   )
 }

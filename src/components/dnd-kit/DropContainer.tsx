@@ -70,6 +70,7 @@ const DropContainer = (props: DropContainerProps): JSX.Element => {
   }
 
   const handleDragMove = (event: DragMoveEvent) => {
+    // console.log('event', event.delta)
     // console.log(`> MOVE:`, event)
     // Save delta in x axis to determine projected depth
     setOffsetLeft(event.delta.x)
@@ -80,9 +81,9 @@ const DropContainer = (props: DropContainerProps): JSX.Element => {
     setOverId(event.over?.id ?? null)
   }
 
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+  const handleDragEnd = ({ active, over, ...rest }: DragEndEvent) => {
     resetState()
-
+    console.log('event', active, over, rest)
     if (projected && over) {
       const { depth, parentId } = projected
 
@@ -99,6 +100,68 @@ const DropContainer = (props: DropContainerProps): JSX.Element => {
       )
 
       const activeMenu = clonedFlattenMenus[activeMenuIndex]
+
+      if (activeMenu.type === 'block') {
+        // block cannot be a child of root
+        if (!parentId) return
+        const parentMenuIndex = clonedFlattenMenus.findIndex(
+          ({ id }) => id === parentId
+        )
+        // if a block with a children cannot have parent as block
+        const parentMenu = clonedFlattenMenus[parentMenuIndex]
+        if (parentMenu.type === 'block') {
+          const grandParentId = parentMenu.parentId
+          // grandparent of a block cannot be a block
+          if (grandParentId) {
+            const grandParenIndex = clonedFlattenMenus.findIndex(
+              ({ id }) => id === grandParentId
+            )
+            const grandParentMenu = clonedFlattenMenus[grandParenIndex]
+            if (grandParentMenu.type === 'block') return
+          }
+          // a block with a children cannot have another block as a parent
+          if (activeMenu.children?.length) return
+        }
+        const siblings = parentMenu.children
+        // block cannot be a child of a section whose child is subsection
+        if (siblings?.some((item) => item.type === 'sub-section')) return
+      }
+
+      if (activeMenu.type === 'sub-section') {
+        // sub-section cannot be a child of root
+        if (!parentId) return
+
+        const parentMenuIndex = clonedFlattenMenus.findIndex(
+          ({ id }) => id === parentId
+        )
+        const parentMenu = clonedFlattenMenus[parentMenuIndex]
+        // sub section cannot be a child of block
+        if (parentMenu.type === 'block') return
+        // section cannot be the child of sub-section
+        if (parentMenu.type === 'sub-section') return
+        // sub section cannot be a child of a section whose child is block
+        const siblings = parentMenu.children
+        if (siblings?.some((item) => item.type === 'block')) return
+      }
+
+      if (activeMenu.type === 'section') {
+        if (parentId) {
+          const parentMenuIndex = clonedFlattenMenus.findIndex(
+            ({ id }) => id === parentId
+          )
+          const parentMenu = clonedFlattenMenus[parentMenuIndex]
+          // section cannot be the child of a block
+          // section cannot be a child of section
+          // section cannot be a child of sub-section
+          if (
+            parentMenu.type === 'sub-section' ||
+            parentMenu.type === 'block' ||
+            parentMenu.type === 'section'
+          )
+            return
+        }
+      }
+
       const updatedFlattenedMenus = reorder(clonedFlattenMenus, {
         sourceIndex: activeMenuIndex,
         destinationIndex: overMenuIndex,

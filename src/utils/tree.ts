@@ -43,26 +43,30 @@ export function buildTree(flattenedMenus: FlattenedMenuItem[]): MenuItem[] {
   const root: Omit<MenuItem, 'children'> & { children: MenuItem[] } = {
     id: 'root',
     title: 'root',
-    type: 'link',
+    type: 'section',
     children: [],
   }
-
+  // console.log('flattened menus', flattenedMenus)
   const keyedMenus: Record<string, MenuItem> = { [root.id]: root }
+  // console.log('keyed menus', keyedMenus)
+
   const items = flattenedMenus.map((item) => ({ ...item, children: [] }))
 
   for (const flattenedMenu of items) {
     const parentId = flattenedMenu.parentId ?? root.id
+    // console.log('parent id', parentId)
     // need to find the parent menu because children of active menu might be above it(it says in the previous position at the moment)
     const parent =
       keyedMenus[parentId] ?? items.find(({ id }) => id === parentId)
+    // console.log('parent', parent)
 
     keyedMenus[flattenedMenu.id] = flattenedMenuToMenu(flattenedMenu)
     const currentMenu = keyedMenus[flattenedMenu.id]
 
-    if (!Array.isArray(parent.children)) {
+    if (!Array.isArray(parent?.children)) {
       parent.children = []
     }
-
+    // console.log('parentId', parentId)
     parent.children.push(currentMenu)
   }
 
